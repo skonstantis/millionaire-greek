@@ -1,4 +1,4 @@
-const LEVELS = [{"amount":100,"safe":false,"lockMs":7000,"difficulty":1},{"amount":200,"safe":false,"lockMs":8000,"difficulty":1},{"amount":300,"safe":false,"lockMs":9000,"difficulty":2},{"amount":400,"safe":false,"lockMs":10000,"difficulty":2},{"amount":500,"safe":true,"lockMs":11000,"difficulty":2},{"amount":1000,"safe":false,"lockMs":12500,"difficulty":3},{"amount":2000,"safe":false,"lockMs":14000,"difficulty":3},{"amount":3000,"safe":false,"lockMs":15500,"difficulty":3},{"amount":4000,"safe":false,"lockMs":17000,"difficulty":3},{"amount":5000,"safe":true,"lockMs":19000,"difficulty":4},{"amount":7500,"safe":false,"lockMs":20250,"difficulty":4},{"amount":10000,"safe":false,"lockMs":21500,"difficulty":4},{"amount":20000,"safe":false,"lockMs":24000,"difficulty":4},{"amount":30000,"safe":false,"lockMs":27000,"difficulty":5},{"amount":100000,"safe":false,"lockMs":30000,"difficulty":5}];
+const LEVELS = [{"amount":100,"safe":false,"lockMs":7000,"difficulty":1},{"amount":200,"safe":false,"lockMs":8000,"difficulty":2},{"amount":300,"safe":false,"lockMs":9000,"difficulty":3},{"amount":400,"safe":false,"lockMs":10000,"difficulty":4},{"amount":500,"safe":true,"lockMs":11000,"difficulty":5},{"amount":1000,"safe":false,"lockMs":12500,"difficulty":6},{"amount":2000,"safe":false,"lockMs":14000,"difficulty":7},{"amount":3000,"safe":false,"lockMs":15500,"difficulty":8},{"amount":4000,"safe":false,"lockMs":17000,"difficulty":9},{"amount":5000,"safe":true,"lockMs":19000,"difficulty":10},{"amount":7500,"safe":false,"lockMs":20250,"difficulty":11},{"amount":10000,"safe":false,"lockMs":21500,"difficulty":12},{"amount":20000,"safe":false,"lockMs":24000,"difficulty":13},{"amount":30000,"safe":false,"lockMs":27000,"difficulty":14},{"amount":100000,"safe":false,"lockMs":30000,"difficulty":15}];
 const LETTERS = ["A","B","Γ","Δ"];
 
 const $ = id => document.getElementById(id);
@@ -7,14 +7,12 @@ const $ = id => document.getElementById(id);
 const USER_Q_KEY = "millionaireUserQuestionsV1";
 const CUSTOM_DRAFT_KEY = "millionaireCustomDraftV1";
 
-/* Price ranges offered by the "add question" form, mapped to difficulty 1-5. */
-const PRICE_BANDS = [
-  {value:1,label:"€100 – €400 (Πολύ εύκολη)"},
-  {value:2,label:"€500 – €1.000 (Εύκολη)"},
-  {value:3,label:"€2.000 – €5.000 (Μεσαία)"},
-  {value:4,label:"€7.500 – €20.000 (Δύσκολη)"},
-  {value:5,label:"€30.000 – €100.000 (Πολύ δύσκολη)"}
-];
+/* One entry per money rung (difficulty 1-15) for the "add question" form.
+   The chosen rung's amount becomes the question's difficulty/level. */
+const PRICE_BANDS = LEVELS.map((lvl,i) => ({
+  value:i + 1,
+  label:"€" + Number(lvl.amount).toLocaleString("el-GR") + (lvl.safe ? " (ασφαλές)" : "")
+}));
 
 const CATEGORIES = CATEGORY_ORDER.map(key => ({key, label: QUESTION_DATA[key].label}));
 

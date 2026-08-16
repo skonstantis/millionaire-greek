@@ -1,60 +1,58 @@
-# Millionaire Host V18 — Categorized, Verified Question Bank
+# Millionaire Host V19 — 15 Difficulty Levels + Personalized Categories
 
 A host-run "Who Wants to Be a Millionaire" board (Greek). The visuals, sounds,
-lifelines and money ladder are unchanged from previous builds; this revision
-replaces the question pool and adds category selection plus two authoring tools.
+lifelines and money ladder are unchanged; this build expands the question bank
+to 15 difficulty levels, grows it to ~50 questions per level, and adds a
+personalized category.
 
 ## What changed in this version
 
-- **Brand-new question bank.** The old pool was deleted and rewritten from
-  scratch. Every question was authored to be concise and factually indisputable,
-  then **independently fact-checked via web search** against authoritative
-  sources (see `SOURCES.md`). Questions whose answer could not be confirmed as
-  correct and unambiguous were not included.
-- **Categories.** Questions are organised into **10 categories**. On the start
-  screen you can pick **one or more** categories; if you pick **none, all**
-  categories are used.
-- **Difficulty scaling.** Each question has a difficulty 1–5 that maps onto the
-  existing 15-step money ladder, so harder questions appear higher up.
-- **Same money ladder.** The 15 amounts and the €500 / €5.000 safe havens are
-  exactly as before. Only the questions per category changed (there are now more,
-  and they are balanced).
-- **Add questions.** A "Προσθήκη ερωτήσεων" button opens a form: pick the price
-  range (→ difficulty), a category, type the question, the four choices and mark
-  the correct one. Added questions are saved in the browser and join the live
-  pool.
-- **Build your own session.** A "Δική σου παρτίδα" button lets you assemble a
-  full custom game of your own questions and play it immediately — handy for
-  personalising a round to the player. Custom sessions climb the normal money
-  ladder in the order you add the questions.
+- **15 difficulty levels.** Each of the 15 money rungs is now its own difficulty
+  tier (1 = €100 … 15 = €100.000). Questions scale smoothly from trivial to
+  expert as the money climbs. The amounts and the €500 / €5.000 safe havens are
+  unchanged.
+- **~50 questions per level.** The bank now holds **712 questions** (~47 per
+  level on average) so rounds stay fresh and replayable.
+- **A personalized category — "Ο Μπαμπάς" (father).** A themed set built around
+  the owner's dad: ούζο/τσίπουρο & Greek drinking culture, ρεμπέτικο/λαϊκό music
+  and kithara.to, the μπουζούκι, Κοζάνη (saffron / Κρόκος Κοζάνης), the Γριτσά /
+  Πιερία coast, Lidl, and fishing — including a few warm in-jokes.
+- **Every question web-verified.** Questions were authored and then
+  **independently fact-checked via web search** against authoritative sources
+  (two separate passes). Anything that couldn't be confirmed correct and
+  unambiguous was dropped. See `SOURCES.md`.
+- **Add-question form covers all 15 rungs.** The "Προσθήκη ερωτήσεων" price
+  dropdown now lists every money rung, so an added question lands on the exact
+  level you choose.
+- Categories, custom sessions, and all other features from V18 are unchanged.
+  Pick one or more category chips on the start screen (none = all). Answer
+  positions are re-shuffled at runtime.
 
-No visual theme, layout, or audio asset was changed — only the UI needed for the
-features above was added, in the existing style.
+No visual theme, layout, or audio asset was changed.
 
 ## Categories & counts
 
 | Category (key) | Ελληνικά | Questions |
 |---|---|---|
-| geography | Γεωγραφία | 20 |
-| greek_history | Ελληνική Ιστορία | 20 |
-| astronomy | Αστρονομία | 20 |
-| seismology | Σεισμολογία | 20 |
-| gaming | Gaming | 20 |
-| history | Ιστορία | 15 |
-| science | Επιστήμη | 15 |
-| nature | Φύση & Ζωή | 15 |
-| math | Μαθηματικά | 15 |
-| sports | Αθλητισμός | 15 |
+| geography | Γεωγραφία | 61 |
+| greek_history | Ελληνική Ιστορία | 74 |
+| history | Ιστορία | 56 |
+| astronomy | Αστρονομία | 70 |
+| seismology | Σεισμολογία | 75 |
+| science | Επιστήμη | 55 |
+| nature | Φύση & Ζωή | 54 |
+| math | Μαθηματικά | 59 |
+| gaming | Gaming | 75 |
+| sports | Αθλητισμός | 59 |
+| father | Ο Μπαμπάς | 74 |
 
-**Total: 175 questions**, every category covering all five difficulty tiers.
-Answer positions are re-shuffled at runtime, so the correct choice is never
-stuck in the same slot.
+**Total: 712 questions**, every category covering all 15 difficulty tiers.
 
 ## Files
 
 - `index.html` — screen markup (setup / game / end) + reusable modal.
-- `styles.css` — theme (unchanged palette) + minimal styles for the new chips and forms.
-- `app.js` — game logic, audio engine, lifelines, category filtering, and the add-question / custom-session tools.
+- `styles.css` — theme (unchanged palette) + styles for chips and forms.
+- `app.js` — game logic, audio engine, lifelines, category filtering, add-question / custom-session tools. `LEVELS` defines the 15 rungs (difficulty 1-15).
 - `questions.js` — the categorized question bank (`QUESTION_DATA` + `CATEGORY_ORDER`).
 
 ## Run
@@ -63,8 +61,6 @@ stuck in the same slot.
 ./start.sh        # serves the folder on http://localhost:8080 (python3 http.server)
 ```
 
-Then open `http://localhost:8080`.
-
 ## Data model (`questions.js`)
 
 ```
@@ -72,13 +68,13 @@ QUESTION_DATA = {
   <categoryKey>: {
     label: "<Greek label>",
     questions: [
-      { d: 1..5, q: "…", o: ["…","…","…","…"], c: 0..3, t: "trivia", s: "source" }
+      { d: 1..15, q: "…", o: ["…","…","…","…"], c: 0..3, t: "trivia", s: "source" }
     ]
   }
 }
 ```
 
-- `d` difficulty → money ladder (1 = €100–200 … 5 = €30.000–100.000)
+- `d` difficulty → money rung (1 = €100 … 15 = €100.000)
 - `c` index of the correct option **as written** (re-shuffled at play time)
 - `t` short host note shown between questions; `s` provenance
 

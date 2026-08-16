@@ -1,65 +1,61 @@
 # Question sources & verification
 
-This build ships a **new** question bank (`questions.js`). The previous pool was
-removed entirely. Questions are grouped into 10 categories, each with a
-difficulty (1–5) that maps onto the 15-step money ladder.
+The question bank (`questions.js`) holds **712 questions** across **11
+categories**, each tagged with a difficulty 1–15 that maps 1:1 onto the 15-step
+money ladder.
 
 ## Authoring & correctness policy
 
 Every question was written to be:
 
 - **Concise** — short stem, four short options.
-- **Time-stable** — no facts that drift (e.g. current record holders were only
-  used where the record is long-standing and confirmed still current).
+- **Time-stable** — no facts that drift (current record holders were used only
+  where the record is long-standing and confirmed still current).
 - **Unambiguous** — exactly one option is defensibly correct; distractors are
   plausible but clearly wrong.
 
-## Independent verification
+## Two-pass verification
 
-After authoring, **each question was independently fact-checked with web
-searches** against authoritative references. A question was kept only when the
-marked answer was confirmed correct **and** the only defensible option; anything
-uncertain, disputed, or time-sensitive was rewritten or dropped. Every one of
-the 175 questions passed this check with a cited source.
+1. **Authoring pass** — each question was written *with* a web search confirming
+   the fact, and a source recorded in its `s` field.
+2. **Independent pass** — a separate adversarial fact-check re-verified every new
+   question via fresh web searches, marking anything wrong/ambiguous/uncertain
+   for removal or correction. A programmatic cross-check then confirmed the
+   verified answer matched the keyed answer for all questions.
 
-Representative authorities used (per category):
+Anything that could not be confirmed correct **and** the only defensible option
+was dropped or rewritten.
 
-- **Γεωγραφία:** Encyclopaedia Britannica, NOAA, National Geographic, UNESCO, CIA World Factbook, Guinness World Records, national governments (e.g. Canada, South Africa), NASA Earth Observatory.
-  - https://oceanservice.noaa.gov/facts/biggestocean.html
-  - https://www.guinnessworldrecords.com/world-records/584626-country-with-the-most-time-zones
-  - https://oceanservice.noaa.gov/facts/sargassosea.html
-- **Ελληνική Ιστορία:** Encyclopaedia Britannica (ancient/Byzantine/modern Greek history).
-  - https://www.britannica.com/sports/ancient-Olympic-Games
-  - https://www.britannica.com/event/Battle-of-Gaugamela
+Representative authorities per category:
+
+- **Γεωγραφία:** Encyclopaedia Britannica, NOAA, National Geographic, UNESCO, CIA World Factbook, Guinness World Records, national governments.
+- **Ελληνική Ιστορία:** Encyclopaedia Britannica, UNESCO, academic history references.
+- **Ιστορία:** Encyclopaedia Britannica, UNESCO, NASA (Apollo 11), national archives/museums.
 - **Αστρονομία:** NASA, ESA, IAU, Encyclopaedia Britannica.
-  - https://science.nasa.gov/mars/facts/
-  - https://www.britannica.com/science/How-Big-Is-Jupiter
-- **Σεισμολογία:** USGS Earthquake Hazards, NOAA, Encyclopaedia Britannica, IRIS/EarthScope.
-  - https://www.usgs.gov/programs/earthquake-hazards/seismograms-seismographs-seismometers
-  - https://www.britannica.com/science/epicentre
-- **Gaming:** Encyclopaedia Britannica, Guinness World Records, official publishers (Nintendo, Sega, Sony, Microsoft, Mojang, Valve).
-  - https://www.guinnessworldrecords.com/world-records/best-selling-video-game
-- **Ιστορία:** Encyclopaedia Britannica, UNESCO, NASA (Apollo 11), National WWII Museum.
-  - https://whc.unesco.org/en/list/438
-  - https://www.nationalww2museum.org/war/topics/end-world-war-ii-1945
-- **Επιστήμη:** IUPAC / RSC periodic table, NIST, BIPM, CERN, PubChem, Encyclopaedia Britannica.
-  - https://pubchem.ncbi.nlm.nih.gov/compound/Water
-  - https://periodic-table.rsc.org/element/79/gold
-- **Φύση & Ζωή:** Encyclopaedia Britannica, NOAA Fisheries, National Human Genome Research Institute, Cleveland Clinic.
-  - https://www.britannica.com/science/What-Is-the-Largest-Animal-on-Earth
-- **Μαθηματικά:** direct computation for arithmetic/geometry; Encyclopaedia Britannica for attributions (Euclid, Leibniz, Pythagoras).
-  - https://www.britannica.com/science/Pythagorean-theorem
+- **Σεισμολογία:** USGS, NOAA, IRIS/EarthScope, Encyclopaedia Britannica.
+- **Επιστήμη:** IUPAC, NIST, BIPM, CERN, Encyclopaedia Britannica.
+- **Φύση & Ζωή:** Encyclopaedia Britannica, NOAA, National Human Genome Research Institute, Smithsonian.
+- **Μαθηματικά:** direct computation for arithmetic/geometry; Encyclopaedia Britannica for attributions.
+- **Gaming:** Encyclopaedia Britannica, Guinness World Records, official publishers, reputable gaming-history references.
 - **Αθλητισμός:** IOC / Olympics.com, FIFA, FIBA, World Athletics, UEFA.
-  - https://olympics.com/ioc/olympic-games
-  - https://www.fifa.com/en/tournaments/mens/worldcup
 
-Each question also carries a short `s` (source) label in `questions.js` naming
-the authority behind the fact.
+Each question also carries a short `s` (source) label in `questions.js`.
+
+## The "Ο Μπαμπάς" (father) category
+
+A personalized, themed category. Its **factual** questions — Greek drinking
+culture (ούζο/τσίπουρο/ρετσίνα), ρεμπέτικο/λαϊκό music and artists, the
+μπουζούκι/μπαγλαμάς, kithara.to, Κοζάνη (σαφράν / Κρόκος Κοζάνης, Αλιάκμονας,
+λίμνη Πολυφύτου), Πιερία/Γριτσά/Όλυμπος, Lidl (Schwarz Group), and fish species
+— were web-verified like every other category (Wikipedia, UNESCO ICH, Britannica,
+official sources). A handful of **personal in-jokes** (e.g. he lives in Κοζάνη,
+loves Lidl, keeps his boat at Γριτσά, and catches «Κανένα» ψάρι) are true by the
+owner's own account and are marked `s: "Προσωπικό"`.
 
 ## Host trivia
 
 Every question has a `t` (trivia) note giving the correct answer and a one-line
-explanation, shown on the between-question screen.
+explanation, shown between questions.
 
 ## User-supplied questions
 
