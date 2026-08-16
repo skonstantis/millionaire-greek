@@ -1,0 +1,8 @@
+Add these MP3 files here:
+
+intro.mp3
+play.mp3
+suspense.mp3
+lock.mp3
+right.mp3
+wrong.mp3
