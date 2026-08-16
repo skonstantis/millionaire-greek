@@ -1,34 +1,88 @@
-# Millionaire Host V17 — Unified Question Bank + Host Trivia
+# Millionaire Host V18 — Categorized, Verified Question Bank
 
-- 15 questions / money levels.
-- Safe levels remain €500 and €5,000.
-- Geography-only mode remains removed; geography questions live in the same unified pool as all other topics.
-- The bank now contains 367 sourced questions.
-- Added 67 curated geography questions from the user-provided source material.
-- Questions are assigned to money levels by perceived difficulty, with no quota per level.
-- Every question now has a `trivia` host note.
-- After each resolved question, the between-question screen shows the trivia/explanation and source before moving on.
-- The trivia interlude also appears before final results after a wrong answer or after the €100,000 question.
-- Existing `sourceId` / `sourceLevel` metadata is retained; external questions also retain source labels and URLs.
-- Selected higher-risk geography facts include an additional `verifiedBy` label when checked against an authoritative source.
-- Corrected the answer index of `src-1486` so the Roman orator is Cicero.
+A host-run "Who Wants to Be a Millionaire" board (Greek). The visuals, sounds,
+lifelines and money ladder are unchanged from previous builds; this revision
+replaces the question pool and adds category selection plus two authoring tools.
 
-## Question count per money level
+## What changed in this version
 
-- €100: 64
-- €200: 17
-- €300: 44
-- €400: 11
-- €500: 49
-- €1.000: 45
-- €2.000: 36
-- €3.000: 23
-- €4.000: 13
-- €5.000: 20
-- €7.500: 12
-- €10.000: 13
-- €20.000: 6
-- €30.000: 7
-- €100.000: 7
+- **Brand-new question bank.** The old pool was deleted and rewritten from
+  scratch. Every question was authored to be concise and factually indisputable,
+  then **independently fact-checked via web search** against authoritative
+  sources (see `SOURCES.md`). Questions whose answer could not be confirmed as
+  correct and unambiguous were not included.
+- **Categories.** Questions are organised into **10 categories**. On the start
+  screen you can pick **one or more** categories; if you pick **none, all**
+  categories are used.
+- **Difficulty scaling.** Each question has a difficulty 1–5 that maps onto the
+  existing 15-step money ladder, so harder questions appear higher up.
+- **Same money ladder.** The 15 amounts and the €500 / €5.000 safe havens are
+  exactly as before. Only the questions per category changed (there are now more,
+  and they are balanced).
+- **Add questions.** A "Προσθήκη ερωτήσεων" button opens a form: pick the price
+  range (→ difficulty), a category, type the question, the four choices and mark
+  the correct one. Added questions are saved in the browser and join the live
+  pool.
+- **Build your own session.** A "Δική σου παρτίδα" button lets you assemble a
+  full custom game of your own questions and play it immediately — handy for
+  personalising a round to the player. Custom sessions climb the normal money
+  ladder in the order you add the questions.
+
+No visual theme, layout, or audio asset was changed — only the UI needed for the
+features above was added, in the existing style.
+
+## Categories & counts
+
+| Category (key) | Ελληνικά | Questions |
+|---|---|---|
+| geography | Γεωγραφία | 20 |
+| greek_history | Ελληνική Ιστορία | 20 |
+| astronomy | Αστρονομία | 20 |
+| seismology | Σεισμολογία | 20 |
+| gaming | Gaming | 20 |
+| history | Ιστορία | 15 |
+| science | Επιστήμη | 15 |
+| nature | Φύση & Ζωή | 15 |
+| math | Μαθηματικά | 15 |
+| sports | Αθλητισμός | 15 |
+
+**Total: 175 questions**, every category covering all five difficulty tiers.
+Answer positions are re-shuffled at runtime, so the correct choice is never
+stuck in the same slot.
+
+## Files
+
+- `index.html` — screen markup (setup / game / end) + reusable modal.
+- `styles.css` — theme (unchanged palette) + minimal styles for the new chips and forms.
+- `app.js` — game logic, audio engine, lifelines, category filtering, and the add-question / custom-session tools.
+- `questions.js` — the categorized question bank (`QUESTION_DATA` + `CATEGORY_ORDER`).
+
+## Run
+
+```sh
+./start.sh        # serves the folder on http://localhost:8080 (python3 http.server)
+```
+
+Then open `http://localhost:8080`.
+
+## Data model (`questions.js`)
+
+```
+QUESTION_DATA = {
+  <categoryKey>: {
+    label: "<Greek label>",
+    questions: [
+      { d: 1..5, q: "…", o: ["…","…","…","…"], c: 0..3, t: "trivia", s: "source" }
+    ]
+  }
+}
+```
+
+- `d` difficulty → money ladder (1 = €100–200 … 5 = €30.000–100.000)
+- `c` index of the correct option **as written** (re-shuffled at play time)
+- `t` short host note shown between questions; `s` provenance
+
+User-added questions are stored in `localStorage` (`millionaireUserQuestionsV1`)
+and merged on load; the custom-session draft lives in `millionaireCustomDraftV1`.
 
 See `SOURCES.md` and `THIRD_PARTY_LICENSES.txt`.

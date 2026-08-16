@@ -11,9 +11,18 @@
     <section id="setupScreen" class="screen setup-screen">
       <div class="logo">€</div>
       <h1>Millionaire</h1>
+
+      <div class="category-picker">
+        <p class="category-hint">Διάλεξε κατηγορίες (ή καμία για όλες)</p>
+        <div id="categoryChips" class="category-chips"></div>
+      </div>
+
       <button id="startBtn" class="primary-btn start-btn" type="button">Έναρξη</button>
 
-
+      <div class="setup-tools">
+        <button id="addQuestionBtn" class="ghost-btn" type="button">Προσθήκη ερωτήσεων</button>
+        <button id="customSessionBtn" class="ghost-btn" type="button">Δική σου παρτίδα</button>
+      </div>
     </section>
 
     <section id="gameScreen" class="screen game-screen hidden">
@@ -105,6 +114,7 @@
   <audio id="soundRight" src="assets/sounds/right.mp3" preload="auto"></audio>
   <audio id="soundWrong" src="assets/sounds/wrong.mp3" preload="auto"></audio>
 
+  <script src="questions.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

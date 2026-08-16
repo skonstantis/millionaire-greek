@@ -370,3 +370,215 @@ body{
     padding:15px 16px;
   }
 }
+
+
+/* ---- Category picker (start screen) ---- */
+.category-picker{
+  width:min(760px,100%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+
+.category-hint{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  letter-spacing:.02em;
+}
+
+.category-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:center;
+}
+
+.category-chip{
+  border:1px solid #4e5c92;
+  border-radius:999px;
+  background:#111a43;
+  color:#eef2ff;
+  padding:8px 14px;
+  font-weight:700;
+  font-size:14px;
+  transition:transform .12s ease,border-color .12s ease,background .12s ease,color .12s ease;
+}
+
+.category-chip:hover{
+  transform:translateY(-1px);
+  border-color:var(--gold2);
+}
+
+.category-chip.selected{
+  background:linear-gradient(180deg,var(--gold2),var(--gold));
+  border-color:var(--gold2);
+  color:#241800;
+}
+
+/* ---- Shared form styling (add-question & custom-session modals) ---- */
+.q-form{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-top:6px;
+}
+
+.q-form label,
+.q-field{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+}
+
+.q-form input[type="text"],
+.q-form select,
+.q-form textarea{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid #4e5c92;
+  border-radius:9px;
+  background:#091233;
+  color:var(--text);
+  font-size:15px;
+}
+
+.q-form input[type="text"]:focus,
+.q-form select:focus,
+.q-form textarea:focus{
+  outline:none;
+  border-color:var(--gold2);
+}
+
+.q-options{
+  border:1px solid #4e5c92;
+  border-radius:11px;
+  padding:12px;
+  margin:0;
+}
+
+.q-options legend{
+  padding:0 6px;
+  color:var(--gold2);
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+.opt-row{
+  display:grid;
+  grid-template-columns:auto auto 1fr;
+  align-items:center;
+  gap:10px;
+  margin:8px 0;
+}
+
+.opt-row .opt-letter{
+  color:var(--gold);
+  font-weight:900;
+  min-width:16px;
+}
+
+.opt-row input[type="radio"]{
+  width:18px;
+  height:18px;
+  accent-color:var(--gold);
+}
+
+.opt-hint{
+  margin:2px 0 0;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.form-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  margin-top:4px;
+}
+
+.form-msg{
+  margin:0;
+  min-height:18px;
+  font-size:13px;
+  font-weight:700;
+}
+
+.form-msg.ok{color:#bff4d7;}
+.form-msg.err{color:#ffd0d7;}
+
+.modal-body-scroll{
+  max-height:min(70vh,560px);
+  overflow-y:auto;
+  padding-right:4px;
+}
+
+/* ---- Custom-session builder ---- */
+.custom-intro{
+  margin:0 0 10px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+}
+
+.custom-list{
+  list-style:none;
+  margin:0 0 12px;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.custom-list:empty::after{
+  content:"Δεν έχεις προσθέσει ερωτήσεις ακόμη.";
+  color:var(--muted);
+  font-size:13px;
+}
+
+.custom-item{
+  display:grid;
+  grid-template-columns:26px 1fr auto;
+  align-items:center;
+  gap:10px;
+  padding:9px 12px;
+  border:1px solid #4e5c92;
+  border-radius:10px;
+  background:#0b1638;
+}
+
+.custom-item .idx{
+  color:var(--gold2);
+  font-weight:900;
+}
+
+.custom-item .txt{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:14px;
+}
+
+.custom-item .remove-btn{
+  border:1px solid #55649a;
+  background:#091233;
+  color:#ffd0d7;
+  border-radius:8px;
+  width:30px;
+  height:30px;
+  font-size:16px;
+  font-weight:900;
+}
+
+.builder-divider{
+  border:0;
+  border-top:1px solid #2a3566;
+  margin:14px 0;
+}

@@ -1,44 +1,69 @@
-# Question sources
+# Question sources & verification
 
-This build uses one unified question bank. Geography is mixed with all other topics, and placement on the 15-step money ladder is manual based on perceived difficulty rather than a fixed quota.
+This build ships a **new** question bank (`questions.js`). The previous pool was
+removed entirely. Questions are grouped into 10 categories, each with a
+difficulty (1–5) that maps onto the 15-step money ladder.
 
-## Original Millionaire dataset
+## Authoring & correctness policy
 
-The original bank is derived from the public `bahadiri/Millionaire` dataset by Bahadir Ismail Aydin, Yavuz Selim Yilmaz, and Murat Demirbas. The source `question.csv` contains the original Turkish question text, four choices, the correct choice, and a `no` field used as game-show level / difficulty metadata.
+Every question was written to be:
 
-This build keeps `sourceId` and `sourceLevel` for those questions. The Greek wording is translated/adapted.
+- **Concise** — short stem, four short options.
+- **Time-stable** — no facts that drift (e.g. current record holders were only
+  used where the record is long-standing and confirmed still current).
+- **Unambiguous** — exactly one option is defensibly correct; distractors are
+  plausible but clearly wrong.
 
-- Repository: https://github.com/bahadiri/Millionaire
-- Source file: https://github.com/bahadiri/Millionaire/blob/master/csv/data/question.csv
-- Paper: Aydin BI, Yilmaz YS, Demirbas M. A crowdsourced “Who wants to be a millionaire?” player. Concurrency and Computation: Practice and Experience. 2017; e4168. DOI: 10.1002/cpe.4168.
+## Independent verification
 
-## Additional geography material supplied for this revision
+After authoring, **each question was independently fact-checked with web
+searches** against authoritative references. A question was kept only when the
+marked answer was confirmed correct **and** the only defensible option; anything
+uncertain, disputed, or time-sensitive was rewritten or dropped. Every one of
+the 175 questions passed this check with a cited source.
 
-The added geography questions were selected and adapted from the source material supplied by the user. Open-ended source questions were converted to four-option Millionaire questions with newly written distractors. Ambiguous, image-dependent, time-sensitive, misleading, or factually problematic candidates were not imported as-is.
+Representative authorities used (per category):
 
-- Parade — Geography Trivia Questions: https://parade.com/1246355/marynliles/geography-trivia/
-- Mentimeter — 100+ Best Geography Trivia Questions and Answers to Test Your Knowledge: https://www.mentimeter.com/blog/education/best-geography-quizzes-and-trivia-questions
-- Nibble — Geography Trivia That Will Blow Your Mind: https://nibble-app.com/blog/geography-trivia
-- Reader’s Digest — 115 Geography Trivia Questions to Test Your Global Knowledge: https://www.rd.com/list/geography-quiz-101/
-- BuzzFeed — Around The World In Geography Trivia Questions: https://www.buzzfeed.com/kellyrissman/geography-trivia-questions
+- **Γεωγραφία:** Encyclopaedia Britannica, NOAA, National Geographic, UNESCO, CIA World Factbook, Guinness World Records, national governments (e.g. Canada, South Africa), NASA Earth Observatory.
+  - https://oceanservice.noaa.gov/facts/biggestocean.html
+  - https://www.guinnessworldrecords.com/world-records/584626-country-with-the-most-time-zones
+  - https://oceanservice.noaa.gov/facts/sargassosea.html
+- **Ελληνική Ιστορία:** Encyclopaedia Britannica (ancient/Byzantine/modern Greek history).
+  - https://www.britannica.com/sports/ancient-Olympic-Games
+  - https://www.britannica.com/event/Battle-of-Gaugamela
+- **Αστρονομία:** NASA, ESA, IAU, Encyclopaedia Britannica.
+  - https://science.nasa.gov/mars/facts/
+  - https://www.britannica.com/science/How-Big-Is-Jupiter
+- **Σεισμολογία:** USGS Earthquake Hazards, NOAA, Encyclopaedia Britannica, IRIS/EarthScope.
+  - https://www.usgs.gov/programs/earthquake-hazards/seismograms-seismographs-seismometers
+  - https://www.britannica.com/science/epicentre
+- **Gaming:** Encyclopaedia Britannica, Guinness World Records, official publishers (Nintendo, Sega, Sony, Microsoft, Mojang, Valve).
+  - https://www.guinnessworldrecords.com/world-records/best-selling-video-game
+- **Ιστορία:** Encyclopaedia Britannica, UNESCO, NASA (Apollo 11), National WWII Museum.
+  - https://whc.unesco.org/en/list/438
+  - https://www.nationalww2museum.org/war/topics/end-world-war-ii-1945
+- **Επιστήμη:** IUPAC / RSC periodic table, NIST, BIPM, CERN, PubChem, Encyclopaedia Britannica.
+  - https://pubchem.ncbi.nlm.nih.gov/compound/Water
+  - https://periodic-table.rsc.org/element/79/gold
+- **Φύση & Ζωή:** Encyclopaedia Britannica, NOAA Fisheries, National Human Genome Research Institute, Cleveland Clinic.
+  - https://www.britannica.com/science/What-Is-the-Largest-Animal-on-Earth
+- **Μαθηματικά:** direct computation for arithmetic/geometry; Encyclopaedia Britannica for attributions (Euclid, Leibniz, Pythagoras).
+  - https://www.britannica.com/science/Pythagorean-theorem
+- **Αθλητισμός:** IOC / Olympics.com, FIFA, FIBA, World Athletics, UEFA.
+  - https://olympics.com/ioc/olympic-games
+  - https://www.fifa.com/en/tournaments/mens/worldcup
 
-Each added question contains a source label and source identifier in `app.js`.
+Each question also carries a short `s` (source) label in `questions.js` naming
+the authority behind the fact.
 
-## Additional verification used for selected tricky facts
+## Host trivia
 
-Some geography superlatives and unusual facts are especially easy to phrase ambiguously. Selected items were cross-checked against more authoritative references before inclusion:
+Every question has a `t` (trivia) note giving the correct answer and a one-line
+explanation, shown on the between-question screen.
 
-- NOAA — Sargasso Sea: https://oceanservice.noaa.gov/facts/sargassosea.html
-- South African Government — national capitals: https://www.gov.za/about-sa/south-africa-glance-1
-- NASA Earth Observatory — Chimborazo and distance from Earth’s center: https://science.nasa.gov/earth/earth-observatory/chimborazo-and-tungurahua-ecuador-6099/
-- Government of Canada — Canada’s coastline: https://www.canada.ca/en/services/environment/our-environment/nature-based-climate-solutions/coastlines.html
-- USGS — Lower Congo River depth measurements: https://www.usgs.gov/media/audio/usgs-hydrologic-investigation-west-africas-congo-river-part-3
-- Guinness World Records — France and time zones: https://www.guinnessworldrecords.com/world-records/584626-country-with-the-most-time-zones
-- Visit Greenland — Scoresby Sund fjord system: https://visitgreenland.com/destinations/ittoqqortoormiit/
-- UNESCO World Heritage Centre — Potala Palace: https://whc.unesco.org/en/list/707
+## User-supplied questions
 
-## Trivia / host notes
-
-Every question now contains a `trivia` field. For newly added geography questions the note contains a short contextual fact or explanation. Legacy questions receive a concise answer explanation so the host always has something readable on the between-question screen. The source label is displayed directly below the note.
-
-Question-source pages are used as provenance for the quiz material; inclusion does not imply that every statement on those pages was accepted without curation.
+Questions added through the in-app **"Προσθήκη ερωτήσεων"** form and the
+**"Δική σου παρτίδα"** builder are authored by the user; their correctness is the
+user's responsibility. They are stored locally in the browser and are not part of
+the verified bank above.
