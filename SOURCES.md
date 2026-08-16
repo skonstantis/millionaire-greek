@@ -43,14 +43,11 @@ Each question also carries a short `s` (source) label in `questions.js`.
 
 ## The "Ο Μπαμπάς" (father) category
 
-A personalized, themed category. Its **factual** questions — Greek drinking
-culture (ούζο/τσίπουρο/ρετσίνα), ρεμπέτικο/λαϊκό music and artists, the
-μπουζούκι/μπαγλαμάς, kithara.to, Κοζάνη (σαφράν / Κρόκος Κοζάνης, Αλιάκμονας,
-λίμνη Πολυφύτου), Πιερία/Γριτσά/Όλυμπος, Lidl (Schwarz Group), and fish species
-— were web-verified like every other category (Wikipedia, UNESCO ICH, Britannica,
-official sources). A handful of **personal in-jokes** (e.g. he lives in Κοζάνη,
-loves Lidl, keeps his boat at Γριτσά, and catches «Κανένα» ψάρι) are true by the
-owner's own account and are marked `s: "Προσωπικό"`.
+A personalized, **humorous roast** of the game owner's dad — absurd, exaggerated
+family jokes (belly, naps, Lidl runs, tsipouro, snoring, never catching a fish).
+These are **not factual** questions, so they are exempt from the verification
+above: the "correct" answer is simply the intended punchline, and each is marked
+`s: "Καζούρα"`. Nothing here is meant literally.
 
 ## Host trivia
 

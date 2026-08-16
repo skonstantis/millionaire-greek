@@ -372,6 +372,37 @@ body{
 }
 
 
+/* ---- Player name (start screen) ---- */
+.player-field{
+  width:min(760px,100%);
+  display:flex;
+  justify-content:center;
+}
+
+.player-field input{
+  width:min(320px,100%);
+  padding:10px 14px;
+  border:1px solid #4e5c92;
+  border-radius:10px;
+  background:#111a43;
+  color:var(--text);
+  font-size:15px;
+  text-align:center;
+}
+
+.player-field input:focus{
+  outline:none;
+  border-color:var(--gold2);
+}
+
+.player-badge{
+  margin:0;
+  color:var(--gold2);
+  font-size:14px;
+  font-weight:800;
+  letter-spacing:.02em;
+}
+
 /* ---- Category picker (start screen) ---- */
 .category-picker{
   width:min(760px,100%);

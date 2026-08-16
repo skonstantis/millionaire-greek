@@ -50,6 +50,30 @@ function saveUserQuestions(list) {
   localStorage.setItem(USER_Q_KEY, JSON.stringify(list));
 }
 
+/* Per-player memory of already-seen questions (keyed by lowercased name).
+   A named player never gets the same question twice; blank name = no memory. */
+const SEEN_KEY = "millionairePlayerSeenV1";
+
+function loadSeen() {
+  try {
+    const o = JSON.parse(localStorage.getItem(SEEN_KEY));
+    return o && typeof o === "object" ? o : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveSeen(store) {
+  localStorage.setItem(SEEN_KEY, JSON.stringify(store));
+}
+
+function persistPlayerSeen() {
+  if (!game || !game.playerKey || !game.playerSeen) return;
+  const store = loadSeen();
+  store[game.playerKey] = Array.from(game.playerSeen).slice(-4000);
+  saveSeen(store);
+}
+
 const BASE_QUESTIONS = normalizeBank();
 let userQuestions = loadUserQuestions();
 let allQuestions = BASE_QUESTIONS.concat(userQuestions);
@@ -481,11 +505,19 @@ function pickQuestion(levelIndex) {
   const difficulty = LEVELS[levelIndex].difficulty;
   const cats = game.categories;
   const used = game.usedIds;
+  const seen = game.playerSeen;   // Set for a named player, else null
 
   const inFilter = allQuestions.filter(q => questionMatchesFilter(q,cats));
   const base = inFilter.length ? inFilter : allQuestions;
 
+  // "fresh" = not used this game and (for a named player) not seen in past games
+  const fresh = q => !used.has(q.id) && (!seen || !seen.has(q.id));
+
   const tiers = [
+    q => fresh(q) && q.difficulty === difficulty,
+    q => fresh(q) && Math.abs(q.difficulty - difficulty) <= 1,
+    q => fresh(q),
+    // player has exhausted their fresh pool — relax the cross-game memory
     q => !used.has(q.id) && q.difficulty === difficulty,
     q => !used.has(q.id) && Math.abs(q.difficulty - difficulty) <= 1,
     q => !used.has(q.id),
@@ -502,7 +534,13 @@ function pickQuestion(levelIndex) {
 
   const selected = pool[Math.floor(Math.random() * pool.length)];
 
-  if (selected) used.add(selected.id);
+  if (selected) {
+    used.add(selected.id);
+    if (seen) {
+      seen.add(selected.id);
+      persistPlayerSeen();
+    }
+  }
 
   return selected;
 }
@@ -589,6 +627,9 @@ function baseGameState() {
     mode:"normal",
     categories:new Set(),
     usedIds:new Set(),
+    playerName:"",
+    playerKey:"",
+    playerSeen:null,
     customQueue:null,
     lifelines:{
       fifty:false,
@@ -612,6 +653,12 @@ function startGame() {
 
   game = baseGameState();
   game.categories = new Set(selectedCategories);
+
+  const nameEl = $("playerName");
+  const name = nameEl ? nameEl.value.trim() : "";
+  game.playerName = name;
+  game.playerKey = name.toLowerCase();
+  game.playerSeen = name ? new Set(loadSeen()[game.playerKey] || []) : null;
 
   buildLadder();
   showScreen("game");
@@ -642,6 +689,12 @@ function showReady(first,ending = false) {
 
   const level = LEVELS[game.levelIndex];
   $("questionCounter").textContent = `${game.levelIndex + 1}/${totalLevels()}`;
+
+  const badge = $("playerBadge");
+  if (badge) {
+    badge.textContent = game.playerName ? `Παίκτης: ${game.playerName}` : "";
+    badge.classList.toggle("hidden",!game.playerName);
+  }
 
   if (first) {
     $("amountDisplay").textContent = formatAmount(level.amount);

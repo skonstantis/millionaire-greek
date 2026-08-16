@@ -11,12 +11,13 @@ personalized category.
   tier (1 = €100 … 15 = €100.000). Questions scale smoothly from trivial to
   expert as the money climbs. The amounts and the €500 / €5.000 safe havens are
   unchanged.
-- **~50 questions per level.** The bank now holds **712 questions** (~47 per
+- **~50 questions per level.** The bank now holds **713 questions** (~47 per
   level on average) so rounds stay fresh and replayable.
-- **A personalized category — "Ο Μπαμπάς" (father).** A themed set built around
-  the owner's dad: ούζο/τσίπουρο & Greek drinking culture, ρεμπέτικο/λαϊκό music
-  and kithara.to, the μπουζούκι, Κοζάνη (saffron / Κρόκος Κοζάνης), the Γριτσά /
-  Πιερία coast, Lidl, and fishing — including a few warm in-jokes.
+- **A personalized category — "Ο Μπαμπάς" (father).** A tongue-in-cheek **roast**
+  of the owner's dad (belly, naps, Lidl runs, tsipouro, snoring, and never
+  catching a single fish). These are absurd family jokes, not facts — the
+  "correct" answer is simply the funniest punchline, so this category is exempt
+  from the factual verification below.
 - **Every question web-verified.** Questions were authored and then
   **independently fact-checked via web search** against authoritative sources
   (two separate passes). Anything that couldn't be confirmed correct and
@@ -44,9 +45,9 @@ No visual theme, layout, or audio asset was changed.
 | math | Μαθηματικά | 59 |
 | gaming | Gaming | 75 |
 | sports | Αθλητισμός | 59 |
-| father | Ο Μπαμπάς | 74 |
+| father | Ο Μπαμπάς (roast) | 75 |
 
-**Total: 712 questions**, every category covering all 15 difficulty tiers.
+**Total: 713 questions**, every category covering all 15 difficulty tiers.
 
 ## Files
 

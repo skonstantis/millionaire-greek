@@ -12,6 +12,10 @@
       <div class="logo">€</div>
       <h1>Millionaire</h1>
 
+      <div class="player-field">
+        <input id="playerName" type="text" maxlength="24" placeholder="Όνομα παίκτη (προαιρετικό)" autocomplete="off">
+      </div>
+
       <div class="category-picker">
         <p class="category-hint">Διάλεξε κατηγορίες (ή καμία για όλες)</p>
         <div id="categoryChips" class="category-chips"></div>
@@ -35,6 +39,7 @@
         <div id="preQuestionStage" class="pre-question-stage hidden">
           <div class="logo small">€</div>
           <h2 id="preQuestionTitle">Έτοιμοι;</h2>
+          <p id="playerBadge" class="player-badge hidden">—</p>
           <section id="triviaCard" class="trivia-card hidden" aria-label="Trivia για τον παρουσιαστή">
             <span class="trivia-kicker">TRIVIA · HOST NOTE</span>
             <p id="triviaText">—</p>
