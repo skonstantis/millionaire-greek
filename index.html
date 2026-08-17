@@ -34,6 +34,7 @@
         <header class="host-header">
           <strong id="questionCounter">—</strong>
           <strong id="amountDisplay">—</strong>
+          <button id="adminToggle" class="host-answer-toggle icon-btn admin-toggle" type="button" aria-label="Admin mode" title="Admin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94a7.5 7.5 0 0 0 .05-1.88l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7 7 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54a7 7 0 0 0-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.6 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.5 7.5 0 0 0 0 1.88L2.72 14.5a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .6.22l2.39-.96a7 7 0 0 0 1.62.94l.36 2.54a.5.5 0 0 0 .5.42h3.84a.5.5 0 0 0 .5-.42l.36-2.54a7 7 0 0 0 1.62-.94l2.39.96a.5.5 0 0 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7Z"/></svg></button>
         </header>
 
         <div id="preQuestionStage" class="pre-question-stage hidden">
@@ -64,6 +65,8 @@
 
           <div class="host-row">
             <button id="revealAnswerBtn" class="host-answer-toggle icon-btn" type="button" aria-label="Σωστή απάντηση" title="Σωστή απάντηση"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.4 12s3.6-6 9.6-6 9.6 6 9.6 6-3.6 6-9.6 6-9.6-6-9.6-6Zm9.6 3.4a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8Z"/></svg></button>
+            <button id="adminSkipBtn" class="admin-action hidden" type="button">Πήδα ερώτηση</button>
+            <button id="adminSwapBtn" class="admin-action hidden" type="button">Αλλαγή (δωρεάν)</button>
           </div>
 
           <section id="lifelines" class="lifelines" aria-label="Βοήθειες">

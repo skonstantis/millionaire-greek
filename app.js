@@ -83,6 +83,7 @@ function rebuildAllQuestions() {
 }
 
 let selectedCategories = new Set();   // empty = all categories
+let adminMode = false;                // host tools: reveal / skip / free swap
 
 
 let game = null;
@@ -756,6 +757,7 @@ function showQuestion() {
 
   renderQuestion();
   renderLifelines();
+  updateAdminUI();
   playQuestionAudio();
 }
 
@@ -1126,6 +1128,68 @@ async function useChange() {
   playQuestionAudio();
 }
 
+/* ---------- Admin mode (host tools) ---------- */
+
+function updateAdminUI() {
+  const toggle = $("adminToggle");
+  if (toggle) toggle.classList.toggle("active",adminMode);
+
+  const hasQuestion = Boolean(game && game.currentQuestion && !game.finished);
+  const showSkip = adminMode && hasQuestion;
+  const showSwap = adminMode && hasQuestion && game.mode !== "custom";
+
+  const skip = $("adminSkipBtn");
+  const swap = $("adminSwapBtn");
+  if (skip) skip.classList.toggle("hidden",!showSkip);
+  if (swap) swap.classList.toggle("hidden",!showSwap);
+}
+
+function toggleAdmin() {
+  adminMode = !adminMode;
+  updateAdminUI();
+}
+
+/* Free swap: replace the current question with another at the same level,
+   no lifeline consumed. (Pool-based modes only.) */
+function adminSwap() {
+  if (!adminMode || !game || !game.currentQuestion || game.finished) return;
+  if (game.mode === "custom") return;
+
+  clearTimers();
+  invalidateQuestionAudio();
+  audioTransitioning = false;
+  stopQuestionBedHard();
+
+  game.currentQuestion = prepareQuestion(pickQuestion(game.levelIndex));
+  game.fiftyRemovedIndices = [];
+  game.locked = false;
+  game.resultResolved = false;
+  game.lockedAnswerIndex = null;
+
+  resetQuestionUi();
+  renderQuestion();
+  renderLifelines();
+  updateAdminUI();
+  playQuestionAudio();
+}
+
+/* Skip: advance to the next money level without answering. */
+function adminSkip() {
+  if (!adminMode || !game || game.finished) return;
+
+  clearTimers();
+  invalidateQuestionAudio();
+  audioTransitioning = false;
+  stopQuestionBedHard();
+
+  if (game.levelIndex < totalLevels() - 1) {
+    game.levelIndex += 1;
+    showQuestion();
+  } else {
+    finishGame(game.wonAmount);
+  }
+}
+
 /* ---------- Category chips (start screen) ---------- */
 
 function renderCategoryChips() {
@@ -1407,6 +1471,9 @@ function playCustomSession() {
 $("startBtn").addEventListener("click",startGame);
 $("addQuestionBtn").addEventListener("click",openAddQuestionModal);
 $("customSessionBtn").addEventListener("click",openCustomSessionModal);
+$("adminToggle").addEventListener("click",toggleAdmin);
+$("adminSkipBtn").addEventListener("click",adminSkip);
+$("adminSwapBtn").addEventListener("click",adminSwap);
 $("showQuestionBtn").addEventListener("click",handleStagePrimary);
 $("stopGameBtn").addEventListener("click",stopGame);
 $("continueBtn").addEventListener("click",continueGame);
