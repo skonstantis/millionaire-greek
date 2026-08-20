@@ -444,6 +444,20 @@ body{
 }
 .answer.host-peek .answer-text{ visibility:visible !important; }
 
+/* ---- Audience betting ---- */
+.bet-phase{ display:flex; flex-direction:column; gap:6px; }
+.bet-q{ margin:0; font-size:18px; text-align:center; }
+.bet-hint{ margin:0 0 6px; color:var(--muted); font-size:13px; text-align:center; }
+.bet-list{ display:flex; flex-direction:column; gap:8px; margin:6px 0; }
+.bet-row{ padding:11px 14px; border-radius:10px; border:1px solid #4e5c92; font-weight:800; text-align:left; font-size:15px; }
+.bet-row.yes{ background:linear-gradient(180deg,#176b49,#0b3d29); border-color:#64e6a2; color:#bff4d7; }
+.bet-row.no{ background:linear-gradient(180deg,#8c293b,#4e1722); border-color:#ff8292; color:#ffd0d7; }
+
+.bet-results{ display:flex; flex-direction:column; gap:6px; margin:10px 0; }
+.bet-line{ padding:8px 12px; border-radius:10px; font-weight:800; text-align:center; font-size:14px; }
+.bet-line.ok{ border:1px solid var(--green); color:#bff4d7; background:rgba(46,188,117,.12); }
+.bet-line.bad{ border:1px solid var(--red); color:#ffd0d7; background:rgba(223,80,99,.12); }
+
 /* ---- Admin mode ---- */
 .admin-toggle.active{
   border-color:var(--gold2);

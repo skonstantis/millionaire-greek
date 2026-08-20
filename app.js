@@ -86,6 +86,21 @@ let selectedCategories = new Set();   // empty = all categories
 let adminMode = false;                // host tools: reveal / skip / free swap
 let wheelEnabled = true;              // Wheel of Fortune spins before each question
 let modTimer = null;                  // countdown timer for the "hot potato" modifier
+let bettingEnabled = true;            // spectators bet on the player before each question
+
+/* Quick dares handed to spectators who lose a bet (or to a "snitch"). */
+const MINI_DARES = [
+  "μία γκριμάτσα για 5 δευτερόλεπτα",
+  "ένα κοπλιμέντο στον παίκτη",
+  "5 καθίσματα",
+  "μία στροφή βαλς μόνος/η σου",
+  "μιμήσου ένα ζώο",
+  "πες κάτι στα «αγγλικά» με βαρύ ελληνικό στιλ",
+  "τραγούδα μία στροφή απ' το αγαπημένο σου",
+  "κάνε τον ήχο ενός σεισμού",
+  "5 δευτερόλεπτα plank",
+  "πες ένα ανέκδοτο (κακό επιτρέπεται)"
+];
 
 /* Wheel of Rewards & Punishments — real-life family dares (not money).
    Each spin sets the stake for the question: a REWARD you get if you answer
@@ -660,6 +675,9 @@ function baseGameState() {
     bonus:0,
     modifier:null,
     blind:false,
+    spectators:[],
+    bets:null,
+    betScores:{},
     lifelines:{
       fifty:false,
       phone:false,
@@ -688,6 +706,11 @@ function startGame() {
   game.playerName = name;
   game.playerKey = name.toLowerCase();
   game.playerSeen = name ? new Set(loadSeen()[game.playerKey] || []) : null;
+
+  const specEl = $("spectators");
+  const specRaw = specEl ? specEl.value : "";
+  game.spectators = specRaw.split(",").map(s => s.trim()).filter(Boolean).slice(0,10);
+  game.betScores = {};
 
   buildLadder();
   showScreen("game");
@@ -787,6 +810,13 @@ function showQuestion() {
   updateBonusDisplay();
 
   const reveal = () => {
+    const bres = $("betResults");
+    if (bres) bres.classList.add("hidden");
+    const snitch = $("snitchBtn");
+    if (snitch) {
+      const on = bettingEnabled && game.spectators && game.spectators.length > 0;
+      snitch.classList.toggle("hidden",!on);
+    }
     renderQuestion();
     renderLifelines();
     updateAdminUI();
@@ -940,6 +970,7 @@ function resolveAnswer() {
 
   applyModifierResolve(correct,level);
   updateBonusDisplay();
+  renderBetResults(correct);
 
   $("continueWrap").classList.remove("hidden");
 }
@@ -971,7 +1002,96 @@ function handleStagePrimary() {
     return;
   }
 
-  showQuestion();
+  startNextQuestion();
+}
+
+/* Runs the audience-betting phase (if enabled) before showing the question. */
+function startNextQuestion() {
+  if (bettingEnabled && game.spectators && game.spectators.length) {
+    openBettingPhase(showQuestion);
+  } else {
+    showQuestion();
+  }
+}
+
+function openBettingPhase(cb) {
+  const who = game.playerName || "ο παίκτης";
+  const rows = game.spectators.map(n =>
+    `<button class="bet-row yes" type="button" data-name="${escapeHtml(n)}" data-bet="yes">${escapeHtml(n)} — ✅ ΝΑΙ</button>`
+  ).join("");
+
+  openModal("🎲 Στοιχήματα κοινού",`
+    <div class="bet-phase">
+      <p class="bet-q">Θα τα καταφέρει <b>${escapeHtml(who)}</b>;</p>
+      <p class="bet-hint">🤫 Μη μαρτυράτε την απάντηση! (πατήστε όποιον στοιχηματίζει «ΟΧΙ»)</p>
+      <div class="bet-list">${rows}</div>
+      <div class="form-actions">
+        <button id="betProceed" class="primary-btn" type="button">Δείξε την ερώτηση</button>
+      </div>
+    </div>
+  `);
+
+  document.querySelectorAll(".bet-row").forEach(btn => {
+    btn.addEventListener("click",() => {
+      const yes = btn.dataset.bet === "yes";
+      btn.dataset.bet = yes ? "no" : "yes";
+      btn.textContent = `${btn.dataset.name} — ${yes ? "❌ ΟΧΙ" : "✅ ΝΑΙ"}`;
+      btn.classList.toggle("yes",!yes);
+      btn.classList.toggle("no",yes);
+    });
+  });
+
+  $("betProceed").addEventListener("click",() => {
+    game.bets = {};
+    document.querySelectorAll(".bet-row").forEach(btn => {
+      game.bets[btn.dataset.name] = btn.dataset.bet;
+    });
+    closeModal();
+    cb();
+  });
+}
+
+function renderBetResults(correct) {
+  const el = $("betResults");
+  if (!el) return;
+
+  if (!bettingEnabled || !game.spectators || !game.spectators.length || !game.bets) {
+    el.classList.add("hidden");
+    return;
+  }
+
+  const winners = [];
+  const losers = [];
+
+  game.spectators.forEach(n => {
+    const bet = game.bets[n];
+    if (!bet) return;
+    const won = (bet === "yes") === correct;
+    if (won) {
+      winners.push(n);
+      game.betScores[n] = (game.betScores[n] || 0) + 1;
+    } else {
+      losers.push(n);
+    }
+  });
+
+  let html = `<div class="bet-line ok">✅ Σωστή πρόβλεψη: ${winners.length ? winners.join(", ") : "—"}</div>`;
+
+  if (losers.length) {
+    const dare = MINI_DARES[Math.floor(Math.random() * MINI_DARES.length)];
+    html += `<div class="bet-line bad">❌ Έχασαν: ${losers.join(", ")} → 😈 ${dare}</div>`;
+  }
+
+  el.innerHTML = html;
+  el.classList.remove("hidden");
+}
+
+function snitchPunish() {
+  const el = $("betResults");
+  if (!el) return;
+  const dare = MINI_DARES[Math.floor(Math.random() * MINI_DARES.length)];
+  el.innerHTML = `<div class="bet-line bad">🗣️ Μαρτύρησε! Ποινή → 😈 ${dare}</div>`;
+  el.classList.remove("hidden");
 }
 
 function stopGame() {
@@ -993,10 +1113,20 @@ function finishGame(payout) {
     ? `<div class="stat"><span>🎁 Μπόνους τροχού</span><strong>${formatAmount(game.bonus)}</strong></div>`
     : "";
 
+  let betStat = "";
+  const scores = game.betScores ? Object.entries(game.betScores) : [];
+  if (scores.length) {
+    scores.sort((a,b) => b[1] - a[1]);
+    if (scores[0][1] > 0) {
+      betStat = `<div class="stat"><span>🔮 Καλύτερος μάντης</span><strong>${scores[0][0]} (${scores[0][1]})</strong></div>`;
+    }
+  }
+
   $("statsGrid").innerHTML = `
     <div class="stat"><span>Κέρδος</span><strong>${formatAmount(payout)}</strong></div>
     <div class="stat"><span>Σωστές</span><strong>${game.correctCount}</strong></div>
     ${bonusStat}
+    ${betStat}
   `;
   showScreen("end");
 }
@@ -1740,6 +1870,15 @@ $("wheelToggle").addEventListener("click",() => {
 $("wheelOverlay").addEventListener("click",() => {
   if (typeof wheelFinish === "function") wheelFinish();   // click to skip the spin
 });
+
+$("betToggle").addEventListener("click",() => {
+  bettingEnabled = !bettingEnabled;
+  const b = $("betToggle");
+  b.classList.toggle("active",bettingEnabled);
+  b.textContent = `👀 Στοιχήματα κοινού: ${bettingEnabled ? "ΟΝ" : "OFF"}`;
+});
+
+$("snitchBtn").addEventListener("click",snitchPunish);
 $("showQuestionBtn").addEventListener("click",handleStagePrimary);
 $("stopGameBtn").addEventListener("click",stopGame);
 $("continueBtn").addEventListener("click",continueGame);
