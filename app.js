@@ -84,6 +84,26 @@ function rebuildAllQuestions() {
 
 let selectedCategories = new Set();   // empty = all categories
 let adminMode = false;                // host tools: reveal / skip / free swap
+let wheelEnabled = true;              // Wheel of Fortune spins before each question
+let modTimer = null;                  // countdown timer for the "hot potato" modifier
+
+/* Wheel of Rewards & Punishments — real-life family dares (not money).
+   Each spin sets the stake for the question: a REWARD you get if you answer
+   correctly, or a PUNISHMENT you do if you get it wrong. The host enforces it. */
+const WHEEL = [
+  {id:"boss",    emoji:"👑", color:"#f1b32c", weight:1, type:"reward", name:"Αρχηγός", text:"Όλοι σε φωνάζουν «Αρχηγέ» μέχρι το επόμενο λάθος!"},
+  {id:"judge",   emoji:"🎯", color:"#fb923c", weight:1, type:"reward", name:"Δικαστής", text:"Δίνεις μία ποινή σε όποιον θέλεις — τώρα!"},
+  {id:"clap",    emoji:"👏", color:"#2ebc75", weight:1, type:"reward", name:"Χειροκρότημα", text:"Όλοι σε χειροκροτούν όρθιοι!"},
+  {id:"immune",  emoji:"🛡️", color:"#38bdf8", weight:1, type:"reward", name:"Ασυλία", text:"Την επόμενη ποινή σου τη δίνεις σε άλλον!"},
+  {id:"love",    emoji:"💖", color:"#f472b6", weight:1, type:"reward", name:"Κοπλιμέντα", text:"Κάθε παίκτης λέει κάτι που θαυμάζει σε σένα!"},
+  {id:"treat",   emoji:"☕", color:"#22d3ee", weight:1, type:"reward", name:"Κέρασμα", text:"Ο χαμένος του γύρου σού φέρνει ό,τι θες να πιεις!"},
+  {id:"karaoke", emoji:"🎤", color:"#df5063", weight:1, type:"punishment", name:"Καραόκε Φώτη", text:"Τραγούδα (φάλτσα) ένα τραγούδι του Φώτη!"},
+  {id:"gym",     emoji:"💪", color:"#e11d48", weight:1, type:"punishment", name:"Γυμναστική", text:"Κάνε 10 καθίσματα ή push-ups, τώρα!"},
+  {id:"dance",   emoji:"🕺", color:"#a78bfa", weight:1, type:"punishment", name:"Ζεϊμπέκικο", text:"Χόρεψε ζεϊμπέκικο 15 δευτερόλεπτα, με κέφι!"},
+  {id:"talk",    emoji:"🗣️", color:"#818cf8", weight:1, type:"punishment", name:"Σαν τον Φώτη", text:"Μίλα σαν τον Φώτη μέχρι την επόμενη ερώτηση!"},
+  {id:"animal",  emoji:"🐔", color:"#84cc16", weight:1, type:"punishment", name:"Ζωικοί ήχοι", text:"Κάνε 3 ζώα που θα διαλέξουν οι άλλοι!"},
+  {id:"quake",   emoji:"🌍", color:"#64748b", weight:1, type:"punishment", name:"Σεισμός", text:"Μίμηση σεισμού με ουρλιαχτό πανικού για 5 δευτ.!"}
+];
 
 
 let game = null;
@@ -143,6 +163,11 @@ function clearTimers() {
 
   if (playFadeFrame !== null) {
     cancelAnimationFrame(playFadeFrame);
+  }
+
+  if (modTimer !== null) {
+    clearInterval(modTimer);
+    modTimer = null;
   }
 
   lockTimer = null;
@@ -632,6 +657,9 @@ function baseGameState() {
     playerKey:"",
     playerSeen:null,
     customQueue:null,
+    bonus:0,
+    modifier:null,
+    blind:false,
     lifelines:{
       fifty:false,
       phone:false,
@@ -743,6 +771,8 @@ function showQuestion() {
   game.resultResolved = false;
   game.lockedAnswerIndex = null;
   game.fiftyRemovedIndices = [];
+  game.modifier = null;
+  game.blind = false;
 
   const level = LEVELS[game.levelIndex];
   const raw = game.mode === "custom"
@@ -754,11 +784,26 @@ function showQuestion() {
   $("questionStage").classList.remove("hidden");
   $("questionCounter").textContent = `${game.levelIndex + 1}/${totalLevels()}`;
   $("amountDisplay").textContent = formatAmount(level.amount);
+  updateBonusDisplay();
 
-  renderQuestion();
-  renderLifelines();
-  updateAdminUI();
-  playQuestionAudio();
+  const reveal = () => {
+    renderQuestion();
+    renderLifelines();
+    updateAdminUI();
+    updateBonusDisplay();
+    if (game.modifier && game.modifier.kind === "timer") startPotatoTimer();
+    playQuestionAudio();
+  };
+
+  if (wheelEnabled) {
+    spinWheel(seg => {
+      game.modifier = seg;
+      applyModifierPre(seg,level);
+      reveal();
+    });
+  } else {
+    reveal();
+  }
 }
 
 function renderQuestion() {
@@ -788,11 +833,25 @@ function renderQuestion() {
     item.append(letter,text,lock);
     $("answersGrid").appendChild(item);
   });
+
+  $("answersGrid").classList.toggle("is-blind",Boolean(game.blind));
+  applyFiftyRemoval();
+  updateModifierBanner();
+}
+
+function applyFiftyRemoval() {
+  game.fiftyRemovedIndices.forEach(i => {
+    const el = document.querySelector(`.answer[data-index="${i}"]`);
+    if (el) el.classList.add("is-removed");
+    const btn = el && el.querySelector(".answer-lock-btn");
+    if (btn) btn.disabled = true;
+  });
 }
 
 async function lockAnswer(index) {
   if (game.locked || game.resultResolved) return;
 
+  stopPotatoTimer();
   game.locked = true;
   game.lockedAnswerIndex = index;
 
@@ -863,6 +922,9 @@ function resolveAnswer() {
 
   const level = LEVELS[game.levelIndex];
 
+  stopPotatoTimer();
+  $("answersGrid").classList.remove("is-blind");   // reveal options after answering
+
   if (correct) {
     game.correctCount += 1;
     game.wonAmount = level.amount;
@@ -876,6 +938,9 @@ function resolveAnswer() {
     playExclusive("soundWrong");
   }
 
+  applyModifierResolve(correct,level);
+  updateBonusDisplay();
+
   $("continueWrap").classList.remove("hidden");
 }
 
@@ -883,13 +948,13 @@ function continueGame() {
   if (!game.resultResolved) return;
 
   if (game.lastResult === "wrong") {
-    game.pendingFinishPayout = game.safeAmount;
+    game.pendingFinishPayout = game.safeAmount + game.bonus;
     showReady(false,true);
     return;
   }
 
   if (game.levelIndex === totalLevels() - 1) {
-    game.pendingFinishPayout = game.wonAmount;
+    game.pendingFinishPayout = game.wonAmount + game.bonus;
     showReady(false,true);
     return;
   }
@@ -913,18 +978,25 @@ function stopGame() {
   invalidateQuestionAudio();
   audioTransitioning = false;
   stopQuestionBedHard();
-  finishGame(game.wonAmount);
+  finishGame(game.wonAmount + game.bonus);
 }
 
 function finishGame(payout) {
   invalidateQuestionAudio();
   audioTransitioning = false;
   stopQuestionBedHard();
+  clearTimers();
   game.finished = true;
   $("endTitle").textContent = formatAmount(payout);
+
+  const bonusStat = game.bonus > 0
+    ? `<div class="stat"><span>🎁 Μπόνους τροχού</span><strong>${formatAmount(game.bonus)}</strong></div>`
+    : "";
+
   $("statsGrid").innerHTML = `
     <div class="stat"><span>Κέρδος</span><strong>${formatAmount(payout)}</strong></div>
     <div class="stat"><span>Σωστές</span><strong>${game.correctCount}</strong></div>
+    ${bonusStat}
   `;
   showScreen("end");
 }
@@ -963,12 +1035,7 @@ function useFifty() {
 
   game.fiftyRemovedIndices = wrong.slice(0,2);
 
-  game.fiftyRemovedIndices.forEach(i => {
-    const el = document.querySelector(`.answer[data-index="${i}"]`);
-    if (el) el.classList.add("is-removed");
-    const btn = el?.querySelector(".answer-lock-btn");
-    if (btn) btn.disabled = true;
-  });
+  applyFiftyRemoval();
 
   renderLifelines();
 }
@@ -1188,6 +1255,194 @@ function adminSkip() {
   } else {
     finishGame(game.wonAmount);
   }
+}
+
+/* ---------- Wheel of Fortune ---------- */
+
+let wheelRot = 0;
+let wheelFinish = null;
+
+function pickWheelSegment() {
+  const total = WHEEL.reduce((a,s) => a + s.weight, 0);
+  let r = Math.random() * total;
+  for (const s of WHEEL) {
+    if ((r -= s.weight) < 0) return s;
+  }
+  return WHEEL[0];
+}
+
+function buildWheelDOM() {
+  const wheel = $("wheel");
+  if (!wheel) return;
+  const deg = 360 / WHEEL.length;
+  const stops = WHEEL.map((s,i) => `${s.color} ${i*deg}deg ${(i+1)*deg}deg`).join(",");
+  wheel.style.background = `conic-gradient(${stops})`;
+}
+
+function spinWheel(cb) {
+  const seg = pickWheelSegment();
+  const overlay = $("wheelOverlay");
+  const wheel = $("wheel");
+  const res = $("wheelResult");
+
+  if (!overlay || !wheel) { cb(seg); return; }   // no DOM (e.g. tests) -> resolve instantly
+
+  const deg = 360 / WHEEL.length;
+  const idx = WHEEL.indexOf(seg);
+  const align = (360 - (idx * deg + deg / 2)) % 360;
+  const cur = ((wheelRot % 360) + 360) % 360;
+  let delta = align - cur;
+  if (delta < 0) delta += 360;
+  wheelRot += 360 * 6 + delta;
+
+  if (res) res.textContent = "";
+  overlay.classList.remove("hidden");
+  wheel.style.transition = "transform 1.6s cubic-bezier(.15,.85,.25,1)";
+  void wheel.offsetWidth;
+  wheel.style.transform = `rotate(${wheelRot}deg)`;
+
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    wheelFinish = null;
+    if (res) res.textContent = `${seg.type === "reward" ? "🏆" : "😈"} ${seg.emoji} ${seg.name}`;
+    setTimeout(() => {
+      overlay.classList.add("hidden");
+      cb(seg);
+    }, 900);
+  };
+
+  wheelFinish = finish;
+  wheel.addEventListener("transitionend",finish,{once:true});
+  setTimeout(finish,2200);   // safety net if transitionend never fires
+}
+
+function applyModifierPre(seg,level) {
+  if (!seg) return;
+
+  if (seg.kind === "fifty") {
+    const wrong = [0,1,2,3]
+      .filter(i => i !== game.currentQuestion.correct)
+      .sort(() => Math.random() - .5);
+    game.fiftyRemovedIndices = wrong.slice(0,2);
+  }
+
+  if (seg.kind === "blind") {
+    game.blind = true;
+  }
+
+  if (seg.kind === "lifeline") {
+    const used = ["fifty","phone","audience","change"].find(k => game.lifelines[k]);
+    if (used) game.lifelines[used] = false;
+    else game.bonus += Math.round(level.amount * 0.5);   // all intact -> small cash instead
+  }
+
+  if (seg.kind === "safe") {
+    game.safeAmount = Math.max(game.safeAmount,level.amount);
+  }
+}
+
+function applyModifierResolve(correct) {
+  const m = game.modifier;
+  const b = $("modifierBanner");
+  if (!m || !b) { if (b) b.classList.add("hidden"); return; }
+
+  b.classList.remove("reward","punish");
+
+  if (m.type === "reward") {
+    if (correct) {
+      b.textContent = `🏆 ΕΠΑΘΛΟ! ${m.text}`;
+      b.classList.add("reward");
+    } else {
+      b.textContent = `😔 Έχασες το έπαθλο (${m.name}).`;
+    }
+  } else {
+    if (!correct) {
+      b.textContent = `😈 ΠΟΙΝΗ! ${m.text}`;
+      b.classList.add("punish");
+    } else {
+      b.textContent = `😅 Τη γλίτωσες την ποινή! (${m.name})`;
+      b.classList.add("reward");
+    }
+  }
+
+  b.classList.remove("hidden");
+}
+
+function modifierDesc(m) {
+  switch (m.id) {
+    case "double":   return "Διπλά κέρδη αν το βρεις!";
+    case "lucky":    return "Μικρό μπόνους αν το βρεις.";
+    case "jackpot":  return "Τεράστιο μπόνους!";
+    case "mega":     return "×5 μπόνους!";
+    case "lifeline": return "Δώρο βοήθειας!";
+    case "fifty":    return "Έφυγαν 2 λάθος, δωρεάν.";
+    case "safe":     return "Αυτό το σκαλί είναι ασφαλές.";
+    case "gamble":   return "Σωστό → διπλό πουγκί · Λάθος → το χάνεις!";
+    case "blind":    return "Δεν βλέπεις τις επιλογές — μεγάλο μπόνους!";
+    case "timer":    return "20 δευτ.! Διπλό μπόνους αν προλάβεις.";
+    default:         return "";
+  }
+}
+
+function updateModifierBanner() {
+  const b = $("modifierBanner");
+  if (!b) return;
+  const m = game && game.modifier;
+  b.classList.remove("reward","punish");
+  if (!m) { b.classList.add("hidden"); return; }
+
+  if (m.type === "reward") {
+    b.textContent = `${m.emoji} Έπαθλο αν το βρεις: ${m.text}`;
+    b.classList.add("reward");
+  } else {
+    b.textContent = `${m.emoji} Ποινή αν το χάσεις: ${m.text}`;
+    b.classList.add("punish");
+  }
+  b.classList.remove("hidden");
+}
+
+function updateBonusDisplay() {
+  const el = $("bonusDisplay");
+  if (!el) return;
+  if (game && game.bonus > 0) {
+    el.textContent = `🎁 +${formatAmount(game.bonus)}`;
+    el.classList.remove("hidden");
+  } else {
+    el.classList.add("hidden");
+  }
+}
+
+function startPotatoTimer() {
+  const el = $("qTimer");
+  let t = 20;
+  if (el) { el.textContent = `⏱️ ${t}″`; el.classList.remove("hidden"); }
+  modTimer = setInterval(() => {
+    t -= 1;
+    if (el) el.textContent = `⏱️ ${t}″`;
+    if (t <= 0) {
+      clearInterval(modTimer);
+      modTimer = null;
+      potatoTimeout();
+    }
+  },1000);
+}
+
+function stopPotatoTimer() {
+  if (modTimer !== null) { clearInterval(modTimer); modTimer = null; }
+  const el = $("qTimer");
+  if (el) el.classList.add("hidden");
+}
+
+function potatoTimeout() {
+  const el = $("qTimer");
+  if (el) el.classList.add("hidden");
+  if (!game || game.locked || game.resultResolved) return;
+  game.locked = true;
+  game.lockedAnswerIndex = -1;   // ran out of time -> wrong
+  document.querySelectorAll(".answer-lock-btn").forEach(b => b.disabled = true);
+  resolveAnswer();
 }
 
 /* ---------- Category chips (start screen) ---------- */
@@ -1474,6 +1729,17 @@ $("customSessionBtn").addEventListener("click",openCustomSessionModal);
 $("adminToggle").addEventListener("click",toggleAdmin);
 $("adminSkipBtn").addEventListener("click",adminSkip);
 $("adminSwapBtn").addEventListener("click",adminSwap);
+
+$("wheelToggle").addEventListener("click",() => {
+  wheelEnabled = !wheelEnabled;
+  const b = $("wheelToggle");
+  b.classList.toggle("active",wheelEnabled);
+  b.textContent = `🎡 Τροχός της Τύχης: ${wheelEnabled ? "ΟΝ" : "OFF"}`;
+});
+
+$("wheelOverlay").addEventListener("click",() => {
+  if (typeof wheelFinish === "function") wheelFinish();   // click to skip the spin
+});
 $("showQuestionBtn").addEventListener("click",handleStagePrimary);
 $("stopGameBtn").addEventListener("click",stopGame);
 $("continueBtn").addEventListener("click",continueGame);
@@ -1526,4 +1792,5 @@ $("newGameBtn").addEventListener("click",() => {
 });
 
 renderCategoryChips();
+buildWheelDOM();
 
